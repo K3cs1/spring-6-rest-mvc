@@ -36,20 +36,31 @@ class CustomerControllerIT {
     @Test
     void deleteByIdFound() {
         Customer customer = customerRepository.findAll().get(0);
+
         ResponseEntity responseEntity = customerController.deleteCustomerById(customer.getId());
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
-        assertThat(customerRepository.findById(customer.getId())).isEmpty();
+
+        assertThat(customerRepository.findById(customer.getId()).isEmpty());
     }
 
     @Test
-    void deleteNotFound() {
-        assertThrows(NotFoundException.class, () -> customerController.deleteCustomerById(UUID.randomUUID()));
+    void testDeleteNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            customerController.deleteCustomerById(UUID.randomUUID());
+        });
+    }
+
+    @Test
+    void testUpdateNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            customerController.updateCustomerByID(UUID.randomUUID(), CustomerDTO.builder().build());
+        });
     }
 
     @Rollback
     @Transactional
     @Test
-    void updateNotFound() {
+    void updateExistingBeer() {
         Customer customer = customerRepository.findAll().get(0);
         CustomerDTO customerDTO = customerMapper.customerToCustomerDto(customer);
         customerDTO.setId(null);
@@ -68,7 +79,9 @@ class CustomerControllerIT {
     @Transactional
     @Test
     void saveNewBeerTest() {
-        CustomerDTO customerDTO = CustomerDTO.builder().name("TEST").build();
+       CustomerDTO customerDTO = CustomerDTO.builder()
+               .name("TEST")
+               .build();
 
         ResponseEntity responseEntity = customerController.handlePost(customerDTO);
 
