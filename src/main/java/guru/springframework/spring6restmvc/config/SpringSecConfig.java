@@ -14,10 +14,11 @@ public class SpringSecConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests()
-                .anyRequest().authenticated()
-                .and().httpBasic(Customizer.withDefaults())
-                .csrf().ignoringRequestMatchers("/api/**");
+
+        http.csrf(httpSecurityCsrfConfigurer -> {
+            httpSecurityCsrfConfigurer.ignoringRequestMatchers("/api/**");
+        });
+
         return http.build();
     }
 
